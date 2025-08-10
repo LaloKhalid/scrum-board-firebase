@@ -1,0 +1,32 @@
+
+
+{
+  "type": "module",
+  "name": "scrum-board-firebase",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaloKhalid/scrum-board-firebase.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LaloKhalid/scrum-board-firebase/issues"
+  },
+  "homepage": "https://github.com/LaloKhalid/scrum-board-firebase#readme",
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "firebase": "^12.1.0"
+  }
+}
