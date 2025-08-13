@@ -1,16 +1,17 @@
-import { db } from "./firebase";
+import { db } from "./firebase.js";
+
 import { collection, getDocs } from "firebase/firestore";
 
-async function testConnection() {
+async function getAssignments() {
   try {
-    const querySnapshot = await getDocs(collection(db, "test"));
-    console.log("✅ Firebase connection successful!");
+    const querySnapshot = await getDocs(collection(db, "assignments"));
+    console.log("Tasks in Firestore:");
     querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data());
+      console.log(doc.id, "=>", doc.data());
     });
   } catch (error) {
-    console.error("❌ Firebase connection failed:", error);
+    console.error("Error fetching assignments:", error);
   }
 }
 
-testConnection();
+getAssignments();

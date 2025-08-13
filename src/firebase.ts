@@ -1,4 +1,6 @@
+
 // src/firebase.ts // firebase setup for Firestore
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import * as dotenv from "dotenv";
