@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scrum Board</title>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <h1>Scrum Board</h1>
+
+  <form id="taskForm">
+    <input type="text" id="title" placeholder="Task title" required />
+    <input type="text" id="category" placeholder="Category" required />
+    <select id="status" required>
+      <option value="new">New</option>
+      <option value="in-progress">In Progress</option>
+      <option value="done">Done</option>
+    </select>
+    <button type="submit">Add Task</button>
+  </form>
+
+  <ul id="taskList"></ul>
+</body>
+</html>
