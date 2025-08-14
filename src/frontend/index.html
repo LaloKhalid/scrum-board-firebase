@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8" />
   <title>Scrum Board</title>
-  <script type="module" src="app.js"></script>
 </head>
 <body>
   <h1>Scrum Board</h1>
 
+  <!-- Task Form -->
   <form id="taskForm">
-    <input type="text" id="title" placeholder="Task title" required />
+    <input type="text" id="title" placeholder="Task Title" required />
     <input type="text" id="category" placeholder="Category" required />
     <select id="status" required>
       <option value="new">New</option>
@@ -18,6 +19,9 @@
     <button type="submit">Add Task</button>
   </form>
 
-  <ul id="taskList"></ul>
+  <h2>Tasks</h2>
+  <div id="taskList"></div>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -1,8 +1,16 @@
-// Import Firebase SDKs from CDN
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+// Import Firebase SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  deleteDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Your Firebase config
+// Firebase config (use your actual values)
 const firebaseConfig = {
   apiKey: "AIzaSyCaMSuMtXh0vAgja4Y0IsR4Vtle1CqmGxc",
   authDomain: "scrum-board-firebase.firebaseapp.com",
@@ -12,39 +20,71 @@ const firebaseConfig = {
   appId: "1:197952936908:web:33ea4decefab1f46465b69"
 };
 
-// Init Firebase
+// Init Firebase + Firestore
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Handle form submit
-document.getElementById("taskForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+// Form elements
+const taskForm = document.getElementById("taskForm");
+const taskList = document.getElementById("taskList");
 
+// Add task to Firestore
+taskForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
   const title = document.getElementById("title").value;
   const category = document.getElementById("category").value;
   const status = document.getElementById("status").value;
 
   try {
     await addDoc(collection(db, "assignments"), { title, category, status });
-    alert("Task added!");
-    document.getElementById("taskForm").reset();
-    loadTasks();
-  } catch (err) {
-    console.error("Error adding task: ", err);
+    console.log("✅ Task added:", title);
+    taskForm.reset();
+  } catch (error) {
+    console.error("❌ Error adding task:", error);
   }
 });
 
-// Load tasks from Firestore
-async function loadTasks() {
-  const taskList = document.getElementById("taskList");
+// Listen for real-time updates
+onSnapshot(collection(db, "assignments"), (snapshot) => {
   taskList.innerHTML = "";
-  const querySnapshot = await getDocs(collection(db, "assignments"));
-  querySnapshot.forEach((doc) => {
-    const li = document.createElement("li");
-    li.textContent = `${doc.data().title} (${doc.data().category}) - ${doc.data().status}`;
-    taskList.appendChild(li);
-  });
-}
+  snapshot.forEach((docSnap) => {
+    const task = docSnap.data();
 
-// Load tasks on page load
-loadTasks();
+    // Create container
+    const taskDiv = document.createElement("div");
+    taskDiv.textContent = `${task.title} — ${task.category} — ${task.status} `;
+
+    // Delete button
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "❌";
+    delBtn.onclick = async () => {
+      await deleteDoc(doc(db, "assignments", docSnap.id));
+      console.log("🗑 Deleted:", task.title);
+    };
+
+    // Edit button
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✏️";
+    editBtn.onclick = async () => {
+      const newTitle = prompt("New title:", task.title);
+      const newCategory = prompt("New category:", task.category);
+      const newStatus = prompt("New status:", task.status);
+
+      if (newTitle && newCategory && newStatus) {
+        await updateDoc(doc(db, "assignments", docSnap.id), {
+          title: newTitle,
+          category: newCategory,
+          status: newStatus
+        });
+        console.log("✏️ Updated:", newTitle);
+      }
+    };
+
+    // Add buttons to taskDiv
+    taskDiv.appendChild(editBtn);
+    taskDiv.appendChild(delBtn);
+
+    // Add taskDiv to list
+    taskList.appendChild(taskDiv);
+  });
+});
