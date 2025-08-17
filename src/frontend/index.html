@@ -14,6 +14,28 @@
     id="searchBox" 
     placeholder="Search tasks..." 
   />
+<!-- ================== Members Section ================== -->
+<section>
+  <h2>Team Members</h2>
+
+  <!-- Add Member Form -->
+  <form id="memberForm">
+    <input type="text" id="memberName" placeholder="Enter member name" required />
+    <select id="memberRole" required>
+      <option value="" disabled selected>Select role</option>
+      <option value="frontend">Frontend</option>
+      <option value="backend">Backend</option>
+      <option value="ux">UX</option>
+    </select>
+    <button type="submit">Add Member</button>
+  </form>
+
+  <!-- Members List -->
+  <div id="membersList">
+    <!-- Example: Alice — frontend -->
+  </div>
+</section>
+<!-- ===================================================== -->
 
   <!-- Task Form -->
   <form id="taskForm">
@@ -21,6 +43,12 @@
     <input type="text" id="description" placeholder="Task Description" required />
 
     <input type="text" id="category" placeholder="Category" required />
+<label for="assignedMember">Assign to:</label>
+<select id="assignedMember">
+  <option value="">-- None --</option>
+</select>
+
+
     <select id="status" required>
       <option value="new">New</option>
       <option value="in-progress">In Progress</option>
