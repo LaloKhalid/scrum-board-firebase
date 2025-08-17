@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <title>Scrum Board</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>Scrum Board</h1>
 
+  <!-- Search Box -->
+  <input 
+    type="text" 
+    id="searchBox" 
+    placeholder="Search tasks..." 
+  />
+
   <!-- Task Form -->
   <form id="taskForm">
     <input type="text" id="title" placeholder="Task Title" required />
+    <input type="text" id="description" placeholder="Task Description" required />
+
     <input type="text" id="category" placeholder="Category" required />
     <select id="status" required>
       <option value="new">New</option>
@@ -20,7 +30,17 @@
   </form>
 
   <h2>Tasks</h2>
-  <div id="taskList"></div>
+  <div class="board">
+    <div class="column" id="new-tasks">
+      <h3>New Tasks</h3>
+    </div>
+    <div class="column" id="in-progress">
+      <h3>In Progress</h3>
+    </div>
+    <div class="column" id="done">
+      <h3>Done</h3>
+    </div>
+  </div>
 
   <script type="module" src="app.js"></script>
 </body>
