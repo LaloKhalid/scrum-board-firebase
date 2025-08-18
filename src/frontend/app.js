@@ -81,11 +81,26 @@ onSnapshot(collection(db, "members"), (snapshot) => {
   membersList.innerHTML = "";
   snapshot.forEach((docSnap) => {
     const member = docSnap.data();
+    const memberId = docSnap.id;
+
     const memberDiv = document.createElement("div");
-    memberDiv.textContent = `${member.name} — ${member.role}`;
+    memberDiv.textContent = `${member.name} — ${member.role} `;
+
+    // ❌ Delete button
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Remove";
+    deleteBtn.onclick = async () => {
+      if (confirm(`Remove ${member.name}?`)) {
+        await deleteDoc(doc(db, "members", memberId));
+        console.log(`🗑️ Removed member ${member.name}`);
+      }
+    };
+
+    memberDiv.appendChild(deleteBtn);
     membersList.appendChild(memberDiv);
   });
 });
+
 
 
 // ✅ Helper: choose member dropdown modal
@@ -178,15 +193,33 @@ function renderTasks(snapshot) {
       newTasksCol.appendChild(taskDiv);
 
     } else if (task.status === "in-progress") {
-      const doneBtn = document.createElement("button");
-      doneBtn.textContent = "Mark as Done";
-      doneBtn.onclick = async () => {
-        await updateDoc(doc(db, "assignments", taskId), { status: "done" });
-      };
-      taskDiv.appendChild(doneBtn);
-      inProgressCol.appendChild(taskDiv);
+  // ✅ Button to mark as done
+  const doneBtn = document.createElement("button");
+  doneBtn.textContent = "Mark as Done";
+  doneBtn.onclick = async () => {
+    await updateDoc(doc(db, "assignments", taskId), { status: "done" });
+  };
+  taskDiv.appendChild(doneBtn);
 
-    } else if (task.status === "done") {
+  // ✅ New reassign button
+  const reassignBtn = document.createElement("button");
+  reassignBtn.textContent = "Reassign";
+  reassignBtn.onclick = async () => {
+    const newMember = prompt("Reassign to which member?");
+    if (newMember) {
+      await updateDoc(doc(db, "assignments", taskId), {
+        assignedMember: newMember
+      });
+      console.log(`🔄 Task reassigned to ${newMember}`);
+    }
+  };
+  taskDiv.appendChild(reassignBtn);
+
+  inProgressCol.appendChild(taskDiv);
+}
+
+
+ else if (task.status === "done") {
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "Delete";
       deleteBtn.onclick = async () => {
