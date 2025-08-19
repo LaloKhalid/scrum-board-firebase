@@ -1,10 +1,23 @@
-// Import Firebase SDK
+// ===============================
+// Firebase SDK Imports
+// ===============================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { 
   getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Firebase config
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+// ===============================
+// Firebase Config + Init
+// ===============================
 const firebaseConfig = {
   apiKey: "AIzaSyCaMSuMtXh0vAgja4Y0IsR4Vtle1CqmGxc",
   authDomain: "scrum-board-firebase.firebaseapp.com",
@@ -14,26 +27,68 @@ const firebaseConfig = {
   appId: "1:197952936908:web:33ea4decefab1f46465b69"
 };
 
-// Init Firebase + Firestore
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// Form + Search
+
+// ===============================
+// DOM Elements
+// ===============================
 const taskForm = document.getElementById("taskForm");
-
-// Members form + list
 const memberForm = document.getElementById("memberForm");
 const membersList = document.getElementById("membersList");
-
 const searchBox = document.getElementById("searchBox");
 
-// Column containers
 const newTasksCol = document.getElementById("new-tasks");
 const inProgressCol = document.getElementById("in-progress");
 const doneCol = document.getElementById("done");
 
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userInfo = document.getElementById("userInfo");
 
-// ✅ Add new task
+
+// ===============================
+// Authentication
+// ===============================
+loginBtn.addEventListener("click", async () => {
+  try {
+    await signInWithPopup(auth, provider);
+    console.log("✅ Logged in");
+  } catch (error) {
+    console.error("❌ Login error:", error);
+  }
+});
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    console.log("✅ Logged out");
+  } catch (error) {
+    console.error("❌ Logout error:", error);
+  }
+});
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    userInfo.textContent = `Logged in as: ${user.displayName} (${user.email})`;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+    taskForm.style.display = "block"; 
+  } else {
+    userInfo.textContent = "Not logged in";
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+    taskForm.style.display = "none"; 
+  }
+});
+
+
+// ===============================
+// Add Task
+// ===============================
 taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const title = document.getElementById("title").value;
@@ -58,7 +113,10 @@ taskForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ✅ Add new member
+
+// ===============================
+// Add Member
+// ===============================
 memberForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const name = document.getElementById("memberName").value;
@@ -76,7 +134,10 @@ memberForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ✅ Show members in realtime
+
+// ===============================
+// Show Members in Realtime
+// ===============================
 onSnapshot(collection(db, "members"), (snapshot) => {
   membersList.innerHTML = "";
   snapshot.forEach((docSnap) => {
@@ -86,7 +147,6 @@ onSnapshot(collection(db, "members"), (snapshot) => {
     const memberDiv = document.createElement("div");
     memberDiv.textContent = `${member.name} — ${member.role} `;
 
-    // ❌ Delete button
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "Remove";
     deleteBtn.onclick = async () => {
@@ -102,13 +162,13 @@ onSnapshot(collection(db, "members"), (snapshot) => {
 });
 
 
-
-// ✅ Helper: choose member dropdown modal
+// ===============================
+// Assign Member to Task (modal)
+// ===============================
 async function chooseMemberAndAssign(taskId) {
   const memberDropdown = document.createElement("select");
   memberDropdown.innerHTML = '<option value="">-- Select member --</option>';
 
-  // Fetch members
   const snapshot = await getDocs(collection(db, "members"));
   snapshot.forEach((docSnap) => {
     const member = docSnap.data();
@@ -121,7 +181,6 @@ async function chooseMemberAndAssign(taskId) {
   const confirmBtn = document.createElement("button");
   confirmBtn.textContent = "Assign";
 
-  // Modal box
   const modal = document.createElement("div");
   modal.style.position = "fixed";
   modal.style.top = "50%";
@@ -144,12 +203,14 @@ async function chooseMemberAndAssign(taskId) {
         status: "in-progress"
       });
     }
-    document.body.removeChild(modal); // close modal
+    document.body.removeChild(modal);
   };
 }
 
 
-// ✅ Render tasks in columns
+// ===============================
+// Render Tasks
+// ===============================
 function renderTasks(snapshot) {
   newTasksCol.innerHTML = '<h3>New Tasks</h3>';
   inProgressCol.innerHTML = '<h3>In Progress</h3>';
@@ -184,7 +245,6 @@ function renderTasks(snapshot) {
     `;
     taskDiv.appendChild(info);
 
-    // Actions
     if (task.status === "new") {
       const assignBtn = document.createElement("button");
       assignBtn.textContent = "Assign to member";
@@ -193,33 +253,29 @@ function renderTasks(snapshot) {
       newTasksCol.appendChild(taskDiv);
 
     } else if (task.status === "in-progress") {
-  // ✅ Button to mark as done
-  const doneBtn = document.createElement("button");
-  doneBtn.textContent = "Mark as Done";
-  doneBtn.onclick = async () => {
-    await updateDoc(doc(db, "assignments", taskId), { status: "done" });
-  };
-  taskDiv.appendChild(doneBtn);
+      const doneBtn = document.createElement("button");
+      doneBtn.textContent = "Mark as Done";
+      doneBtn.onclick = async () => {
+        await updateDoc(doc(db, "assignments", taskId), { status: "done" });
+      };
+      taskDiv.appendChild(doneBtn);
 
-  // ✅ New reassign button
-  const reassignBtn = document.createElement("button");
-  reassignBtn.textContent = "Reassign";
-  reassignBtn.onclick = async () => {
-    const newMember = prompt("Reassign to which member?");
-    if (newMember) {
-      await updateDoc(doc(db, "assignments", taskId), {
-        assignedMember: newMember
-      });
-      console.log(`🔄 Task reassigned to ${newMember}`);
-    }
-  };
-  taskDiv.appendChild(reassignBtn);
+      const reassignBtn = document.createElement("button");
+      reassignBtn.textContent = "Reassign";
+      reassignBtn.onclick = async () => {
+        const newMember = prompt("Reassign to which member?");
+        if (newMember) {
+          await updateDoc(doc(db, "assignments", taskId), {
+            assignedMember: newMember
+          });
+          console.log(`🔄 Task reassigned to ${newMember}`);
+        }
+      };
+      taskDiv.appendChild(reassignBtn);
 
-  inProgressCol.appendChild(taskDiv);
-}
+      inProgressCol.appendChild(taskDiv);
 
-
- else if (task.status === "done") {
+    } else if (task.status === "done") {
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "Delete";
       deleteBtn.onclick = async () => {
@@ -233,12 +289,18 @@ function renderTasks(snapshot) {
   });
 }
 
-// ✅ Realtime listener for tasks
+
+// ===============================
+// Realtime Listener for Tasks
+// ===============================
 onSnapshot(collection(db, "assignments"), (snapshot) => {
   renderTasks(snapshot);
 });
 
-// ✅ Search filter
+
+// ===============================
+// Search Filter
+// ===============================
 searchBox.addEventListener("input", () => {
   const searchTerm = searchBox.value.toLowerCase();
   const allColumns = [newTasksCol, inProgressCol, doneCol];
